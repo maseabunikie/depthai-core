@@ -29,6 +29,10 @@
 
 namespace dai {
 
+#if SPDLOG_VERSION < 10601
+spdlog::level::level_enum CurrentLogLevel = spdlog::level::warn;
+#endif
+
 // local static function
 static LogLevel spdlogLevelToLogLevel(spdlog::level::level_enum level, LogLevel defaultValue = LogLevel::OFF) {
     switch(level) {
@@ -47,7 +51,9 @@ static LogLevel spdlogLevelToLogLevel(spdlog::level::level_enum level, LogLevel 
         case spdlog::level::off:
             return LogLevel::OFF;
         // Default
+#if SPDLOG_VERSION >= 10601
         case spdlog::level::n_levels:
+#endif
         default:
             return defaultValue;
             break;
@@ -361,7 +367,11 @@ void Device::init(const Pipeline& pipeline, bool embeddedMvcmd, bool usb2Mode, c
             std::unique_lock<std::mutex>(this->rpcMutex);
 
             // Log the request data
+#if SPDLOG_VERSION >= 10601
             if(spdlog::get_level() == spdlog::level::trace) {
+#else
+            if(dai::CurrentLogLevel == spdlog::level::trace) {
+#endif
                 spdlog::trace("RPC: {}", nlohmann::json::from_msgpack(request).dump());
             }
 
@@ -483,8 +493,13 @@ void Device::init(const Pipeline& pipeline, bool embeddedMvcmd, bool usb2Mode, c
     });
 
     // Set logging level (if DEPTHAI_LEVEL lower than warning, then device is configured accordingly as well)
-    if(spdlog::get_level() < spdlog::level::warn) {
+#if SPDLOG_VERSION >= 10601
+    if(spdlog::get_level() == spdlog::level::warn) {
         auto level = spdlogLevelToLogLevel(spdlog::get_level());
+#else
+    if(dai::CurrentLogLevel == spdlog::level::warn) {
+        auto level = spdlogLevelToLogLevel(dai::CurrentLogLevel);
+#endif
         setLogLevel(level);
         setLogOutputLevel(level);
     } else {
@@ -795,7 +810,11 @@ bool Device::startPipeline() {
     if(isPipelineRunning()) return false;
 
     // if debug
+#if SPDLOG_VERSION >= 10601
     if(spdlog::get_level() == spdlog::level::debug) {
+#else
+    if(dai::CurrentLogLevel == spdlog::level::debug) {
+#endif
         nlohmann::json jSchema = schema;
         spdlog::debug("Schema dump: {}", jSchema.dump());
         nlohmann::json jAssets = assets;

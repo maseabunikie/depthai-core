@@ -9,6 +9,9 @@
 
 // shared
 #include "depthai-shared/xlink/XLinkConstants.hpp"
+#if SPDLOG_VERSION < 10601
+#include "depthai-shared/log/LogLevel.hpp"
+#endif
 
 // libraries
 #include "spdlog/spdlog.h"
@@ -55,7 +58,11 @@ DataOutputQueue::DataOutputQueue(const std::shared_ptr<XLinkConnection>& conn, c
                 auto data = parsePacketToADatatype(packet);
 
                 // Trace level debugging
+#if SPDLOG_VERSION >= 10601
                 if(spdlog::get_level() == spdlog::level::trace) {
+#else
+                if(dai::CurrentLogLevel == spdlog::level::trace) {
+#endif
                     std::vector<std::uint8_t> metadata;
                     DatatypeEnum type;
                     data->getRaw()->serialize(metadata, type);
@@ -201,7 +208,11 @@ DataInputQueue::DataInputQueue(const std::shared_ptr<XLinkConnection>& conn, con
                 }
 
                 // Trace level debugging
+#if SPDLOG_VERSION >= 10601
                 if(spdlog::get_level() == spdlog::level::trace) {
+#else
+                if(dai::CurrentLogLevel == spdlog::level::trace) {
+#endif
                     std::vector<std::uint8_t> metadata;
                     DatatypeEnum type;
                     data->serialize(metadata, type);

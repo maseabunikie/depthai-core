@@ -10,7 +10,11 @@
 #include "archive_entry.h"
 
 // spdlog
+#if SPDLOG_VERSION >= 10600 // v1.6.0
 #include "spdlog/fmt/chrono.h"
+#else
+#include "spdlog/fmt/bundled/chrono.h"
+#endif
 #include "spdlog/spdlog.h"
 
 extern "C" {

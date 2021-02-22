@@ -4,8 +4,12 @@
 #include "utility/Resources.hpp"
 
 // libraries
+#if SPDLOG_VERSION >= 10600 // v1.6.0
 #include "spdlog/cfg/env.h"
 #include "spdlog/cfg/helpers.h"
+#else
+#include "depthai-shared/log/LogLevel.hpp"
+#endif
 #include "spdlog/details/os.h"
 #include "spdlog/spdlog.h"
 
@@ -34,6 +38,7 @@ bool initialize() {
 
     if(initialized.exchange(true)) return true;
 
+#if SPD_VERSION >= 10601 //v1.6.1
     // Set global logging level from ENV variable 'DEPTHAI_LEVEL'
     // Taken from spdlog, to replace with DEPTHAI_LEVEL instead of SPDLOG_LEVEL
     // spdlog::cfg::load_env_levels();
@@ -44,6 +49,15 @@ bool initialize() {
         // Otherwise set default level to WARN
         spdlog::set_level(spdlog::level::warn);
     }
+#else
+    if(const char* env_val = std::getenv("DEPTHAI_LEVEL")) {
+        spdlog::set_level(spdlog::level::from_str(std::string(env_val)));
+        dai::CurrentLogLevel = spdlog::level::from_str(std::string(env_val));
+    } else {
+        // Otherwise set default level to WARN
+        spdlog::set_level(spdlog::level::warn);
+    }
+#endif
 
     // auto debugger_val = spdlog::details::os::getenv("DEPTHAI_DEBUGGER");
     // if(!debugger_val.empty()){

@@ -75,8 +75,8 @@ find_package(archive_static REQUIRED)
 find_package(lzma REQUIRED)
 
 # spdlog for library and device logging
-hunter_add_package(spdlog)
-find_package(spdlog CONFIG REQUIRED)
+#hunter_add_package(spdlog)
+#find_package(spdlog CONFIG REQUIRED)
 
 # Add depthai-shared, and definitions that it is PC side
 include(${CMAKE_CURRENT_LIST_DIR}/shared/depthai-shared.cmake)
@@ -304,7 +304,7 @@ target_link_libraries(${TARGET_NAME}
         BZip2::bz2
         FP16::fp16
         archive_static
-        spdlog::spdlog
+        spdlog
 )
 
 # Add compile definitions
